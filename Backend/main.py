@@ -2,9 +2,17 @@ import flask
 import os
 import subprocess
 from flask_cors import CORS
+import platform
+
+def whatsplatform(): #--> str
+    return "windows" if platform.system() == "Windows" else "linux"
+    
+
 
 app = flask.Flask(__name__)
 CORS(app)  # Initialize CORS extension
+
+
 
 codetypes = {
     "python": "py",
@@ -15,6 +23,8 @@ codetypes = {
 @app.route('/compiler', methods=['POST'])
 def receive_data():
     data = flask.request.json
+    lang = "python3" if whatsplatform() == "linux" else "python"
+    
 
     if data['language'] not in codetypes:
         return "error", 400
@@ -26,7 +36,7 @@ def receive_data():
             file.write(data['code'])
 
         if file_extension == "py":
-            result = subprocess.run(["python", 'test.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            result = subprocess.run([lang, 'test.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             output = result.stdout + result.stderr
         else:
             output = "Language not supported yet"
@@ -41,4 +51,4 @@ def receive_data():
         }
 
 if __name__ == "__main__":
-    app.run(host="192.168.0.104", port=8080, debug=True)
+    app.run(host="192.168.2.150", port=8080, debug=True)
